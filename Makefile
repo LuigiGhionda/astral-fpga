@@ -9,7 +9,7 @@ ID              ?=
 TARGET          ?= smp
 
 # OpenOCD ports
-GDB_PORT    ?= 3333
+GDB_PORT    ?= 3334
 TCL_PORT    ?= disabled
 TELNET_PORT ?= disabled
 
@@ -141,7 +141,17 @@ openocd: $(OPENOCD_DEPS)
 gdb:
 	$(GDB) \
 	-ex "target extended-remote :$(GDB_PORT)"
-gdb-load-payload: $(GDB_DEPS)
+
+gdb-load-payload:
+	$(eval INITIAL_PC := $(shell LC_ALL=C riscv64-unknown-elf-objdump -f $(PAYLOAD) | awk '/start address/ {print $$NF}'))
+	$(GDB) $(PAYLOAD) \
+	-ex "target extended-remote :$(GDB_PORT)" \
+	$(if $(filter $(IMAGES_DIR)/fw_payload.elf,$(PAYLOAD)), \
+		-ex "monitor load_image $(DTB_FILE) $(DTB_ADDR)",) \
+	$(foreach i, $(shell seq 1 $(NUM_HARTS)), -ex "thread $(i)" -ex "set \$$pc=$(INITIAL_PC)" -ex "info registers pc") \
+	-ex "load"
+
+gdb-load-payload-and-run:
 	$(eval INITIAL_PC := $(shell LC_ALL=C riscv64-unknown-elf-objdump -f $(PAYLOAD) | awk '/start address/ {print $$NF}'))
 	$(GDB) $(PAYLOAD) \
 	-ex "target extended-remote :$(GDB_PORT)" \
