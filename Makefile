@@ -4,7 +4,7 @@ OPENOCD_SCRIPTS ?= $(abspath $(dir $(shell which $(OPENOCD)))/../share/openocd/s
 GDB             ?= riscv64-unknown-elf-gdb
 ADAPTER_SPEED   ?= 1000
 INTERFACE       ?= ftdi
-DEVICE          ?= olimex-arm-usb-ocd-h
+DEVICE          ?= digilent-hs2
 ID              ?=
 TARGET          ?= smp
 
