@@ -3,7 +3,9 @@
 
 ## Overview
 
-This project is set up to build and deploy software on the Astral platform by using FPGA emulation on the VCU118 development board. The provided Makefile is designed to automate various tasks including setting up the environment and running OpenOCD and GDB for debugging.
+This project is set up to build and deploy software on the [Astral platform](https://github.com/pulp-platform/astral) by using FPGA emulation on the VCU118 development board. The provided Makefile is designed to automate various tasks including setting up the environment and running OpenOCD and GDB for debugging.
+
+A basic guide on how to map Astral on Xilinx VCU118 FPGA can be found in the [`doc`](doc/) folder.
 
 ## Requirements
 
