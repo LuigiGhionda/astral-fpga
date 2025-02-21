@@ -1,6 +1,7 @@
 # \[WIP\] Astral FPGA Development Flow
 
 Main repository: [`pulp-platform/astral`](https://github.com/pulp-platform/astral)
+
 Target branch: [`lg/non_iis`](https://github.com/pulp-platform/astral/tree/lg/non_iis)
 
 All Astral flows are Makefile-based and all commands must be invoked from the main directory.
@@ -9,7 +10,7 @@ _This basic documentation is based on that of [Carfield](https://pulp-platform.g
 
 ## Architecture
 
-This section provides _**basic**_ info about Astrals architecture.
+This section provides _**basic**_ info about Astral's architecture.
 
 Astral is organized in _domains_, and a fully-featured Astral provides:
 
@@ -60,7 +61,7 @@ This bash script set some env variables and check for the presence of RISCV{32,6
 -   `make car-checkout`: It invokes Bender tool to checkout all IP dependencies that are currently pinned in the Bender.lock file.*
 -   `make car-hw-init`: Initialize Carfield HW. This step takes care of the generation of the missing hardware or the update of default HW configurations in some of the domains.
 
-*_Note that this command could show an error about not having the right to fetch the `rv_plic` repository. This happens if you havent set an SSH key to GitHub (even if the repository is public). However, this is not going to disrupt the build flow as those files are not indeed used. Anyway, we are aware of this and we are working to fix it._
+*_Note that this command could show an error about not having the right to fetch the `rv_plic` repository. This happens if you haven't set an SSH key to GitHub (even if the repository is public). However, this is not going to disrupt the build flow as those files are not indeed used. Anyway, we are aware of this and we are working to fix it._
 
 ## 2.1 (Recommended) Build Astral with QuestaSim
 
@@ -129,16 +130,16 @@ make car-xil-all XILINX_FLAVOR=vanilla XILINX_BOARD=vcu118 GEN_NO_HYPERBUS=1 GEN
 
 Where:
 
--   `GEN_EXT_JTAG=1`: using `EXT_JTAG=1` we add an external JTAG chain for the RV64 host and other islands through the FPGAs Pmod GPIOs header J52 where we connect an Olimex ARM-USB-OCD-H/Digilent JTAG-HS2*.
+-   `GEN_EXT_JTAG=1`: using `EXT_JTAG=1` we add an external JTAG chain for the RV64 host and other islands through the FPGA's Pmod GPIOs header J52 where we connect an Olimex ARM-USB-OCD-H/Digilent JTAG-HS2*.
 -   `GEN_NO_HYPERBUS=1`: at the moment interfacing with the Xilinx DDR controller is not properly working, however, to avoid synthesizing the Hyperbus Controller this flag is set to 1.
 
-\* The VCU118 development board only provides one JTAG chain, used by Vivado to program the bitstream, and interact with certain Xilinx IPs (ILAs, VIOs, ). The RV64 requires access to a JTAG chain to connect GDB to the debug-module in the bitstream. When using `EXT_JTAG=0` it is possible to connect the debug module to the internal FPGAs JTAG by using the Xilinx BSCANE macro. With this, you will only need the normal Xilinx USB cable to interact with CVA6. Note that it means that Vivado and OpenOCD can not use the same cable at the same time. This setup (with `EXT_JTAG=0`) will only work for designs containing the host only, as it is not possible to chain multiple devices on the BSCANE macro. If you need to use `EXT_JTAG=0` consider modifying the RTL to remove the debug modules of the IPs.
+\* The VCU118 development board only provides one JTAG chain, used by Vivado to program the bitstream, and interact with certain Xilinx IPs (ILAs, VIOs, ...). The RV64 requires access to a JTAG chain to connect GDB to the debug-module in the bitstream. When using `EXT_JTAG=0` it is possible to connect the debug module to the internal FPGA's JTAG by using the Xilinx BSCANE macro. With this, you will only need the normal Xilinx USB cable to interact with CVA6. Note that it means that Vivado and OpenOCD can not use the same cable at the same time. This setup (with `EXT_JTAG=0`) will only work for designs containing the host only, as it is not possible to chain multiple devices on the BSCANE macro. If you need to use `EXT_JTAG=0` consider modifying the RTL to remove the debug modules of the IPs.
 
 # Software Stack
 
-This section provides _**basic**_ info about Astrals software stack.
+This section provides _**basic**_ info about Astral's software stack.
 
-Astrals Software Stack is provided in the `sw/` folder, organized as follows:
+Astral's Software Stack is provided in the `sw/` folder, organized as follows:
 
 ```
 sw
@@ -169,7 +170,7 @@ It initializes and builds the SW libraries of the different domains (host, pulp 
 
 As in Cheshire, Astral programs can be created to be executed from several memory locations:
 
--   Dynamic SPM (`*.l2.elf`): the linkerscript is provided in Astrals `sw/link/` folder, since Dynamic SPM is not integrated in the minimal Cheshire
+-   Dynamic SPM (`*.l2.elf`): the linkerscript is provided in Astral's `sw/link/` folder, since Dynamic SPM is not integrated in the minimal Cheshire
 -   LLC SPM (`*.spm.elf`): valid when the LLC is configured as such. In Astral, half of the LLC is configured as SPM from the boot ROM during system bringup, as this is the default behavior in Cheshire (host_domain).
 -   DRAM (`*.dram.elf`): the off-chip DRAM, e.g., the HyperRAM
 
@@ -181,13 +182,13 @@ make sw/tests/bare-metal/hostd/helloworld.car.l2.elf
 
 ## Simple baremetal offload
 
-In these tests, the offloader (_host_domain_) takes care of bootstrapping the target device ELF in the correct memory location, initializing the target and launching its execution through a simple ELF Loader. The ELF Loader source code is located in the offloaders SW directory, and follows a naming convention:
+In these tests, the offloader (_host_domain_) takes care of bootstrapping the target device ELF in the correct memory location, initializing the target and launching its execution through a simple ELF Loader. The ELF Loader source code is located in the offloader's SW directory, and follows a naming convention:
 
 ```
 <target_device>_offloader_<blocking|non_blocking>.c
 ```
 
-The target devices ELF is included into the offloaders ELF Loader as a _header file_. The target devices ELF sections are first pre-processed offline to extract instruction addresses.The resulting header file provides the ELF loading process at the selected memory location. The loading process can be carried out by the offloader as R/W sequences, or deferred to a DMA-driven memcopy. In addition, the offloader takes care of bootstrapping the target device, i.e. initializing it and launching its execution. Upon target device completion, the offloader sychronously polls a specific register to catch the completion (_blocking_ offload type).
+The target device's ELF is included into the offloader's ELF Loader as a _header file_. The target device's ELF sections are first pre-processed offline to extract instruction addresses.The resulting header file provides the ELF loading process at the selected memory location. The loading process can be carried out by the offloader as R/W sequences, or deferred to a DMA-driven memcopy. In addition, the offloader takes care of bootstrapping the target device, i.e. initializing it and launching its execution. Upon target device completion, the offloader sychronously polls a specific register to catch the completion (_blocking_ offload type).
 
 As an example, assume the _host domain_ as offloader and the _PULP cluster_ as target device.
 
@@ -195,7 +196,7 @@ As an example, assume the _host domain_ as offloader and the _PULP cluster_ as t
 2.  A header file is generated out of each regression test available in the PULP cluster repository. For this example, the resulting header files are included in `sw/tests/bare-metal/pulpd`
 3.  The final ELF executed by the offloader is created by subsequently including each header file from each cluster regression test
 
-The resulting offloader ELFs name reads:
+The resulting offloader ELF's name reads:
 ```
 <target_device>_offloader_<blocking|non_blocking>.<target_device_test_name>.car.<l2|spm|dram>.elf
 ```
