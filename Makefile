@@ -26,7 +26,7 @@ HW_TARGET     ?=
 CVA6_SDK_DIR  ?= cva6-sdk
 IMAGES_DIR    ?= $(CVA6_SDK_DIR)/install64
 PAYLOAD       ?= $(IMAGES_DIR)/fw_payload.elf
-DTB_FILE      ?= $(CVA6_SDK_DIR)/alsaqr.dtb
+DTB_FILE      ?= astral_vanilla_vcu118.dtb
 DTB_ADDR      ?= 0x81800000
 
 MEM_BASE_ADDR ?= 0x80000000
@@ -161,8 +161,18 @@ gdb-load-payload-and-run:
 	-ex "load" \
 	-ex "continue"
 
-.PHONY: clean deep-clean
+.PHONY: boot-linux
+boot-linux:
+	$(eval INITIAL_PC := $(shell LC_ALL=C riscv64-unknown-elf-objdump -f $(PAYLOAD) | awk '/start address/ {print $$NF}'))
+	$(GDB) $(PAYLOAD) \
+	-ex "target extended-remote :$(GDB_PORT)" \
+	-ex "monitor load_image $(DTB_FILE) $(DTB_ADDR)" \
+	-ex "load" \
+	-ex "thread 1" -ex "set \$$a0=0" -ex "set \$$a1=$(DTB_ADDR)" -ex "set \$$a2=0" \
+	-ex "set \$$pc=$(INITIAL_PC)"  -ex "info registers pc"\
+	
 
+.PHONY: clean deep-clean
 clean:
 	make -C $(CVA6_SDK_DIR) clean
 	make -C $(CVA6_SDK_DIR)/opensbi clean
